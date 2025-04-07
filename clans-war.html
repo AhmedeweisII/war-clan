@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Members War Table</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f4f4f4;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      background: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      table-layout: fixed;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      text-align: center;
+      padding: 6px;
+      font-size: 14px;
+    }
+
+    th {
+      background-color: #333;
+      color: white;
+      position: sticky;
+      top: 0;
+    }
+
+    input[type="text"] {
+      width: 50px;
+      padding: 4px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .row-label {
+      background-color: #eee;
+      font-weight: bold;
+    }
+
+    .label-cell {
+      background-color: #ffc107;
+      font-weight: bold;
+      color: #000;
+    }
+
+    tfoot td {
+      background-color: #f0f0f0;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Members War Score Table</h2>
+<table id="scoreTable">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Member</th>
+      <th>War 1</th>
+      <th>War 2</th>
+      <th>War 3</th>
+      <th>War 4</th>
+      <th>War 5</th>
+      <th>War 6</th>
+      <th>War 7</th>
+      <th>Results</th>
+    </tr>
+  </thead>
+  <tbody id="table-body">
+    <!-- Rows will be inserted here -->
+  </tbody>
+</table>
+
+<script>
+  const names = [
+    'black music', 'king of pirates', 'debo', 'abdo fathy', 'abo gabal',
+    'avata', 'abdulla fahmy', 'king of legends', 'ارشر king', 'azward',
+    'assem', 'ahmed ibrahim', 'dr elzghaby', 'iron man', 'اسلام'
+  ];
+
+  const war1 = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1];
+  const war2 = [0,0,0,0,0,1,3,1,1,0,0,1,0,2,2];
+  const war3 = [0,1,0,1,1,1,2,2,0,1,0,0,2,1,1];
+  const war4 = [0,0,-1,0,0,-1,1,0,0,1,1,0,0,1,-2];
+
+  const tableBody = document.getElementById("table-body");
+
+  function renderTable() {
+    tableBody.innerHTML = "";
+    const data = [];
+
+    for (let i = 0; i < 15; i++) {
+      const inputs = [];
+      for (let j = 4; j <= 6; j++) {
+        const key = `cell_${i}_${j}`;
+        inputs.push(parseInt(localStorage.getItem(key)) || 0);
+      }
+
+      const total = war1[i] + war2[i] + war3[i] + war4[i] + inputs.reduce((a, b) => a + b, 0);
+      data.push({ index: i, total, inputs });
+    }
+
+    const sorted = [...data].sort((a, b) => b.total - a.total);
+
+    const ranks = Array(15);
+    sorted.forEach((item, rank) => {
+      ranks[item.index] = rank + 1;
+    });
+
+    for (let i = 0; i < 15; i++) {
+      const tr = document.createElement("tr");
+
+      const rankCell = `<td class="label-cell">#${ranks[i]}</td>`;
+      const nameCell = `<td class="row-label">${names[i]}</td>`;
+      const warCells = `<td>${war1[i]}</td><td>${war2[i]}</td><td>${war3[i]}</td><td>${war4[i]}</td>`;
+
+      let inputCells = "";
+      for (let j = 4; j <= 6; j++) {
+        const key = `cell_${i}_${j}`;
+        const savedValue = localStorage.getItem(key) || '';
+        inputCells += `<td><input type="text" value="${savedValue}" data-row="${i}" data-col="${j}" oninput="handleInput(this)" /></td>`;
+      }
+
+      const totalCell = `<td class="total">${data[i].total}</td>`;
+
+      tr.innerHTML = rankCell + nameCell + warCells + inputCells + totalCell;
+      tableBody.appendChild(tr);
+    }
+  }
+
+  function handleInput(input) {
+    const row = input.dataset.row;
+    const col = input.dataset.col;
+    const value = input.value;
+    localStorage.setItem(`cell_${row}_${col}`, value);
+    renderTable();
+  }
+
+  window.onload = () => renderTable();
+</script>
+
+</body>
+</html>
